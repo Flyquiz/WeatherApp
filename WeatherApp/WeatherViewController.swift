@@ -11,6 +11,7 @@ final class WeatherViewController: UIViewController {
     
     private let networkManager = NetworkManager.shared
     
+    //MARK: UIElements
     private let cityLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -62,7 +63,15 @@ final class WeatherViewController: UIViewController {
         return label
     }()
     
+    private let activityIndicator: UIActivityIndicatorView = {
+        let activityIndicator = UIActivityIndicatorView(style: .large)
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.startAnimating()
+        return activityIndicator
+    }()
     
+    //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
@@ -70,12 +79,18 @@ final class WeatherViewController: UIViewController {
     }
     
     
+    //MARK: Methods
     private func setupLayout() {
         view.backgroundColor = .systemGray6
         
-        [cityLabel, conditionLabel, tempLabel, windMainLabel, windSpdLabel, windDirLabel, pressureLabel].forEach {
-            view.addSubview($0)
-        }
+        [cityLabel, 
+         conditionLabel,
+         tempLabel,
+         windMainLabel,
+         windSpdLabel,
+         windDirLabel,
+         pressureLabel,
+         activityIndicator].forEach { view.addSubview($0) }
         
         let verticalInset: CGFloat = 10
         let leadingInset: CGFloat = 20
@@ -101,27 +116,44 @@ final class WeatherViewController: UIViewController {
             windSpdLabel.leadingAnchor.constraint(equalTo: conditionLabel.leadingAnchor),
             
             windDirLabel.topAnchor.constraint(equalTo: windSpdLabel.bottomAnchor, constant: verticalInset),
-            windDirLabel.leadingAnchor.constraint(equalTo: conditionLabel.leadingAnchor)
+            windDirLabel.leadingAnchor.constraint(equalTo: conditionLabel.leadingAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
-    private func getWeather() {
-        networkManager.fetchWeather { [weak self] result in
-            switch result {
-            case .success(let weather):
-                self?.fillToVC(weather: weather)
-                print("data get")
-            case .failure(_):
-                print("NO")
-            }
-        }
-    }
     private func fillToVC(weather: Weather) {
+        activityIndicator.removeFromSuperview()
         cityLabel.text! += weather.location.name
         conditionLabel.text! += weather.current.condition.text
         tempLabel.text! += "\(weather.current.temp) C"
         pressureLabel.text! += "\(weather.current.pressureInch) inch"
         windSpdLabel.text! += "\(weather.current.windSpd) kph"
         windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
+    }
+    
+    private func showAlert(error: NetworkError) {
+        let alertAction = UIAlertAction(title: "Try again",
+                                        style: .destructive) { _ in 
+            self.getWeather()
+        }
+        let alert = UIAlertController(title: "Error",
+                                      message: error.title,
+                                      preferredStyle: .alert)
+            alert.addAction(alertAction)
+        present(alert, animated: true)
+    }
+    
+    //MARK: Networking
+    private func getWeather() {
+        networkManager.fetchWeather { [weak self] result in
+            switch result {
+            case .success(let weather):
+                self?.fillToVC(weather: weather)
+            case .failure(let error):
+                self?.showAlert(error: error)
+            }
+        }
     }
 }

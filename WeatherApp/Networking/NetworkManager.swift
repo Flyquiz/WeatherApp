@@ -37,10 +37,12 @@ final class NetworkManager {
                     sendError(error: .decodingError)
                 }
                 //TODO: Errors
+            case 400:
+                sendError(error: .badRequest)
             case 401:
                 sendError(error: .authorizationError)
             case 404:
-                sendError(error: .noData)
+                sendError(error: .notFound)
             default:
                 return
             }
@@ -73,20 +75,26 @@ extension NetworkManager {
         }
     }
     
-    enum NetworkError: Error {
-        case noData
-        case authorizationError
-        case decodingError
-        
-        var title: String {
-            switch self {
-            case .noData:
-                return "Can't get data"
-            case .authorizationError:
-                return "Wrong authorization key for API"
-            case .decodingError:
-                return "Can't decode data"
-            }
+}
+
+
+enum NetworkError: Error {
+    
+    case badRequest
+    case authorizationError
+    case notFound
+    case decodingError
+    
+    var title: String {
+        switch self {
+        case .badRequest:
+            return "400: Can't get data, bad request"
+        case .authorizationError:
+            return "401: Wrong authorization key for API"
+        case .notFound:
+            return "404: Can't get data, not found"
+        case .decodingError:
+            return "Can't decode data"
         }
     }
 }
