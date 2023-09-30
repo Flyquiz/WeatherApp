@@ -9,6 +9,8 @@ import UIKit
 
 final class WeatherViewController: UIViewController {
     
+    private let networkManager = NetworkManager.shared
+    
     private let cityLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -64,6 +66,7 @@ final class WeatherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
+        getWeather()
     }
     
     
@@ -100,5 +103,25 @@ final class WeatherViewController: UIViewController {
             windDirLabel.topAnchor.constraint(equalTo: windSpdLabel.bottomAnchor, constant: verticalInset),
             windDirLabel.leadingAnchor.constraint(equalTo: conditionLabel.leadingAnchor)
         ])
+    }
+    
+    private func getWeather() {
+        networkManager.fetchWeather { [weak self] result in
+            switch result {
+            case .success(let weather):
+                self?.fillToVC(weather: weather)
+                print("data get")
+            case .failure(_):
+                print("NO")
+            }
+        }
+    }
+    private func fillToVC(weather: Weather) {
+        cityLabel.text! += weather.location.name
+        conditionLabel.text! += weather.current.condition.text
+        tempLabel.text! += "\(weather.current.temp) C"
+        pressureLabel.text! += "\(weather.current.pressureInch) inch"
+        windSpdLabel.text! += "\(weather.current.windSpd) kph"
+        windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
     }
 }
