@@ -9,6 +9,7 @@
 ## TODO List
 - [ ] City change
 - [ ] Geolocation 
+- [ ] Title screen
 - [ ] Forecast
 - [ ] Simple UI with icons
 - [ ] Settings VC/Change units

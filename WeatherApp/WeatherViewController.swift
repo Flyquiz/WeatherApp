@@ -6,10 +6,22 @@
 //
 
 import UIKit
+import CoreLocation
 
 final class WeatherViewController: UIViewController {
     
     private let networkManager = NetworkManager.shared
+    
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        manager.requestWhenInUseAuthorization()
+        manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+        manager.requestLocation()
+        return manager
+    }()
+    
+    private lazy var currentLocation = CLLocation()
     
     //MARK: UIElements
     private let cityLabel: UILabel = {
@@ -71,7 +83,7 @@ final class WeatherViewController: UIViewController {
         return activityIndicator
     }()
     
-    private let geoButton: UIButton = {
+    private lazy var geoButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -79,6 +91,7 @@ final class WeatherViewController: UIViewController {
                                   withConfiguration: UIImage.SymbolConfiguration(scale: .large))?
             .withTintColor(.black, renderingMode: .alwaysOriginal)
         button.setImage(buttonImage, for: .normal)
+        button.addTarget(self, action: #selector(geoButtonAction), for: .touchUpInside)
         return button
     }()
     
@@ -148,7 +161,8 @@ final class WeatherViewController: UIViewController {
         windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
     }
     
-    private func showAlert(error: NetworkError) {
+    //MARK: Alert methods
+    private func showNetworkAlert(error: NetworkError) {
         let alertAction = UIAlertAction(title: "Try again",
                                         style: .default) { _ in
             self.getWeather()
@@ -160,6 +174,13 @@ final class WeatherViewController: UIViewController {
         present(alert, animated: true)
     }
     
+    private func showLocationAlert() {
+        let alertAction = UIAlertAction(title: "OK", style: .default)
+        let alert = UIAlertController(title: "Can't get location", message: "Allow access to geolocation in iPhone settings", preferredStyle: .alert)
+            alert.addAction(alertAction)
+        present(alert, animated: true)
+    }
+    
     //MARK: Networking
     private func getWeather() {
         networkManager.fetchWeather { [weak self] result in
@@ -167,8 +188,42 @@ final class WeatherViewController: UIViewController {
             case .success(let weather):
                 self?.fillToVC(weather: weather)
             case .failure(let error):
-                self?.showAlert(error: error)
+                self?.showNetworkAlert(error: error)
             }
+        }
+    }
+    
+    //MARK: Actions
+    @objc private func geoButtonAction() {
+        if locationManager.authorizationStatus != .denied {
+            locationManager.requestLocation()
+        } else {
+            showLocationAlert()
+            //            locationManager.requestWhenInUseAuthorization()
+        }
+    }
+}
+              
+
+              
+
+//MARK: Location
+extension WeatherViewController: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        if let location = locations.first {
+            print(location)
+            currentLocation = location
+        }
+    }
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if UIApplication.shared.applicationState == .active {
+            manager.requestLocation()
+        }
+        if manager.authorizationStatus == .denied {
+            showLocationAlert()
         }
     }
 }
