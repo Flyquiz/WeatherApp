@@ -71,6 +71,17 @@ final class WeatherViewController: UIViewController {
         return activityIndicator
     }()
     
+    private let geoButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        let buttonImage = UIImage(systemName: "location.circle",
+                                  withConfiguration: UIImage.SymbolConfiguration(scale: .large))?
+            .withTintColor(.black, renderingMode: .alwaysOriginal)
+        button.setImage(buttonImage, for: .normal)
+        return button
+    }()
+    
     //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,7 +101,8 @@ final class WeatherViewController: UIViewController {
          windSpdLabel,
          windDirLabel,
          pressureLabel,
-         activityIndicator].forEach { view.addSubview($0) }
+         activityIndicator,
+         geoButton].forEach { view.addSubview($0) }
         
         let verticalInset: CGFloat = 10
         let leadingInset: CGFloat = 20
@@ -99,7 +111,7 @@ final class WeatherViewController: UIViewController {
             cityLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             
             
-            conditionLabel.topAnchor.constraint(equalTo: cityLabel.bottomAnchor, constant: verticalInset),
+            conditionLabel.topAnchor.constraint(equalTo: cityLabel.bottomAnchor, constant: verticalInset * 2),
             conditionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingInset),
             
             tempLabel.topAnchor.constraint(equalTo: conditionLabel.bottomAnchor, constant: verticalInset),
@@ -119,7 +131,10 @@ final class WeatherViewController: UIViewController {
             windDirLabel.leadingAnchor.constraint(equalTo: conditionLabel.leadingAnchor),
             
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            
+            geoButton.trailingAnchor.constraint(equalTo: cityLabel.leadingAnchor, constant: -20),
+            geoButton.centerYAnchor.constraint(equalTo: cityLabel.centerYAnchor)
         ])
     }
     
