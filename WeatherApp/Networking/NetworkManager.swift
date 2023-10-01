@@ -10,13 +10,13 @@ import UIKit
 final class NetworkManager {
     
     private let apiKey = "686db746adf5403590d133639232609"
-    private let q = "q=peterburg"
+//    private let q = "q=peterburg"
     
     static let shared = NetworkManager()
     private init() {}
     
-    public func fetchWeather(completion: @escaping (Result<Weather, NetworkError>) -> ()) {
-        let url = URL(string: Links.current.url.absoluteString + "?" + q)!
+    public func fetchWeather(_ location: String, completion: @escaping (Result<Weather, NetworkError>) -> ()) {
+        let url = URL(string: Links.current.url.absoluteString + "?q=" + location)!
         
         var request = URLRequest(url: url)
         request.setValue(apiKey, forHTTPHeaderField: "key")

@@ -10,6 +10,9 @@ import CoreLocation
 
 final class WeatherViewController: UIViewController {
     
+    //TODO: Temporary
+    private let currentCity = "Peterburg"
+    
     private let networkManager = NetworkManager.shared
     
     private lazy var locationManager: CLLocationManager = {
@@ -99,7 +102,7 @@ final class WeatherViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupLayout()
-        getWeather()
+        getWeather(from: currentCity)
     }
     
     
@@ -152,20 +155,31 @@ final class WeatherViewController: UIViewController {
     }
     
     private func fillToVC(weather: Weather) {
-        activityIndicator.removeFromSuperview()
         cityLabel.text! += weather.location.name
         conditionLabel.text! += weather.current.condition.text
         tempLabel.text! += "\(weather.current.temp) C"
         pressureLabel.text! += "\(weather.current.pressureInch) inch"
         windSpdLabel.text! += "\(weather.current.windSpd) kph"
         windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
+        
+        //TODO: activityIndicator
+        activityIndicator.stopAnimating()
+    }
+    
+    private func clearVC() {
+        cityLabel.text! = "City - "
+        conditionLabel.text! = "Condition - "
+        tempLabel.text! = "Temperature - "
+        pressureLabel.text! = "Pressure - "
+        windSpdLabel.text! = "Speed - "
+        windDirLabel.text! = "Direction - "
     }
     
     //MARK: Alert methods
     private func showNetworkAlert(error: NetworkError) {
         let alertAction = UIAlertAction(title: "Try again",
                                         style: .default) { _ in
-            self.getWeather()
+            self.getWeather(from: self.currentCity)
         }
         let alert = UIAlertController(title: "Error",
                                       message: error.title,
@@ -182,10 +196,12 @@ final class WeatherViewController: UIViewController {
     }
     
     //MARK: Networking
-    private func getWeather() {
-        networkManager.fetchWeather { [weak self] result in
+    private func getWeather(from location: String) {
+//        activityIndicator.startAnimating()
+        networkManager.fetchWeather(location) { [weak self] result in
             switch result {
             case .success(let weather):
+                self?.clearVC()
                 self?.fillToVC(weather: weather)
             case .failure(let error):
                 self?.showNetworkAlert(error: error)
@@ -213,13 +229,19 @@ extension WeatherViewController: CLLocationManagerDelegate {
         if let location = locations.first {
             print(location)
             currentLocation = location
+            
+            let latitude = location.coordinate.latitude as Double
+            let longitude = location.coordinate.longitude as Double
+            let strLocation = "\(latitude) \(longitude)"
+            getWeather(from: strLocation)
         }
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         print(error)
     }
+    //TODO: Did't work requestLocation when Auth did change
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if UIApplication.shared.applicationState == .active {
+        if UIApplication.shared.applicationState == .active && manager.authorizationStatus != .denied {
             manager.requestLocation()
         }
         if manager.authorizationStatus == .denied {
