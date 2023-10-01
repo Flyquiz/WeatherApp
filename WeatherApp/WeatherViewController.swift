@@ -135,7 +135,7 @@ final class WeatherViewController: UIViewController {
     
     private func showAlert(error: NetworkError) {
         let alertAction = UIAlertAction(title: "Try again",
-                                        style: .destructive) { _ in 
+                                        style: .default) { _ in
             self.getWeather()
         }
         let alert = UIAlertController(title: "Error",

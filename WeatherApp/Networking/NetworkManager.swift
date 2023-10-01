@@ -17,13 +17,14 @@ final class NetworkManager {
     
     public func fetchWeather(completion: @escaping (Result<Weather, NetworkError>) -> ()) {
         let url = URL(string: Links.current.url.absoluteString + "?" + q)!
+        
         var request = URLRequest(url: url)
         request.setValue(apiKey, forHTTPHeaderField: "key")
                 
         //TODO: timeout interval for apiKey
         URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data, let response = response as? HTTPURLResponse else { return }
-            print(response.statusCode)
+            print("Status code: \(response.statusCode)")
             switch response.statusCode {
             case 200...299:
                 
@@ -36,11 +37,14 @@ final class NetworkManager {
                 } catch {
                     sendError(error: .decodingError)
                 }
+                
                 //TODO: Errors
             case 400:
                 sendError(error: .badRequest)
             case 401:
                 sendError(error: .authorizationError)
+            case 403:
+                sendError(error: .forbidden)
             case 404:
                 sendError(error: .notFound)
             default:
@@ -82,6 +86,7 @@ enum NetworkError: Error {
     
     case badRequest
     case authorizationError
+    case forbidden
     case notFound
     case decodingError
     
@@ -91,10 +96,12 @@ enum NetworkError: Error {
             return "400: Can't get data, bad request"
         case .authorizationError:
             return "401: Wrong authorization key for API"
+        case .forbidden:
+            return "403: Forbidden. Can't get access, check API key"
         case .notFound:
             return "404: Can't get data, not found"
         case .decodingError:
-            return "Can't decode data"
+            return "Internal error: Can't decode data"
         }
     }
 }
