@@ -12,6 +12,7 @@ final class WeatherViewController: UIViewController {
     
     //TODO: Temporary
     private let currentCity = "Peterburg"
+    private var isGettingDataFromGeo = false
     
     private let networkManager = NetworkManager.shared
     
@@ -91,16 +92,29 @@ final class WeatherViewController: UIViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         
         let buttonImage = UIImage(systemName: "location.circle",
-                                  withConfiguration: UIImage.SymbolConfiguration(scale: .large))?
-            .withTintColor(.black, renderingMode: .alwaysOriginal)
+                                  withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        button.tintColor = .black
         button.setImage(buttonImage, for: .normal)
         button.addTarget(self, action: #selector(geoButtonAction), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var citiesListButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        let buttonImage = UIImage(systemName: "list.bullet",
+                                  withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        button.tintColor = .black
+        button.setImage(buttonImage, for: .normal)
+        button.addTarget(self, action: #selector(citiesListAction), for: .touchUpInside)
         return button
     }()
     
     //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.isHidden = true
         setupLayout()
         getWeather(from: currentCity)
     }
@@ -118,7 +132,8 @@ final class WeatherViewController: UIViewController {
          windDirLabel,
          pressureLabel,
          activityIndicator,
-         geoButton].forEach { view.addSubview($0) }
+         geoButton,
+         citiesListButton].forEach { view.addSubview($0) }
         
         let verticalInset: CGFloat = 10
         let leadingInset: CGFloat = 20
@@ -149,8 +164,11 @@ final class WeatherViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             
-            geoButton.trailingAnchor.constraint(equalTo: cityLabel.leadingAnchor, constant: -20),
-            geoButton.centerYAnchor.constraint(equalTo: cityLabel.centerYAnchor)
+            citiesListButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
+            citiesListButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingInset),
+            
+            geoButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
+            geoButton.leadingAnchor.constraint(equalTo: citiesListButton.trailingAnchor, constant: 20)
         ])
     }
     
@@ -164,6 +182,12 @@ final class WeatherViewController: UIViewController {
         
         //TODO: activityIndicator
         activityIndicator.stopAnimating()
+        
+        if isGettingDataFromGeo {
+            geoButton.tintColor = .systemBlue
+        } else {
+            geoButton.tintColor = .black
+        }
     }
     
     private func clearVC() {
@@ -218,6 +242,10 @@ final class WeatherViewController: UIViewController {
             //            locationManager.requestWhenInUseAuthorization()
         }
     }
+    
+    @objc private func citiesListAction() {
+        navigationController?.pushViewController(CitiesListController(), animated: true)
+    }
 }
               
 
@@ -234,6 +262,7 @@ extension WeatherViewController: CLLocationManagerDelegate {
             let longitude = location.coordinate.longitude as Double
             let strLocation = "\(latitude) \(longitude)"
             getWeather(from: strLocation)
+            isGettingDataFromGeo = true
         }
     }
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
