@@ -9,6 +9,7 @@ import UIKit
 
 final class CitiesListController: UIViewController {
     
+    //MARK: UIElements
     private lazy var citiesCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
         flowLayout.scrollDirection = .vertical
@@ -17,15 +18,31 @@ final class CitiesListController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(CityCollectionViewCell.self, forCellWithReuseIdentifier: CityCollectionViewCell.identifier)
+        collectionView.backgroundColor = view.backgroundColor
         return collectionView
     }()
     
+    private lazy var citySearchController: UISearchController = {
+        let searchController = UISearchController()
+        searchController.searchBar.delegate = self
+        return searchController
+    }()
     
+    //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.searchController = citySearchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        title = "Weather"
         setupLayout()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = false
+    }
+    
+    //MARK: Methods
     private func setupLayout() {
         view.backgroundColor = .systemGray6
         view.addSubview(citiesCollectionView)
@@ -41,6 +58,7 @@ final class CitiesListController: UIViewController {
 
 
 
+//MARK: collectionView: DataSource
 extension CitiesListController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         10
@@ -53,6 +71,9 @@ extension CitiesListController: UICollectionViewDataSource {
     }
 }
 
+
+
+//MARK: collectionView: DelegateFlowLayout
 extension CitiesListController: UICollectionViewDelegateFlowLayout {
     
     private var inset: CGFloat { return 20 }
@@ -68,15 +89,20 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return inset
     }
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
-//        <#code#>
-//    }
 }
 
 
 
-extension UIView {
-    static var identifier: String {
-        String(describing: self)
+extension CitiesListController: UISearchBarDelegate {
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        guard let text = searchBar.text else { return }
+        if text.checkEmptiness {
+            let vc = WeatherViewController()
+            vc.currentCity = text
+            present(vc, animated: true)
+        } else {
+            searchBar.text = ""
+            return
+        }
     }
 }

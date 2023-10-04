@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		AA75D1BB2ACB00B700B1C5AA /* CitiesListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA75D1BA2ACB00B700B1C5AA /* CitiesListController.swift */; };
 		AA75D1C02ACB045900B1C5AA /* CityCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA75D1BF2ACB045900B1C5AA /* CityCollectionViewCell.swift */; };
+		AA9396F32ACD9408000E6798 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9396F22ACD93BA000E6798 /* Extensions.swift */; };
 		AAA62D632AC319E1006C7A6C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA62D622AC319E1006C7A6C /* AppDelegate.swift */; };
 		AAA62D652AC319E1006C7A6C /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA62D642AC319E1006C7A6C /* SceneDelegate.swift */; };
 		AAA62D6C2AC319E4006C7A6C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAA62D6B2AC319E4006C7A6C /* Assets.xcassets */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		AA75D1BA2ACB00B700B1C5AA /* CitiesListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitiesListController.swift; sourceTree = "<group>"; };
 		AA75D1BF2ACB045900B1C5AA /* CityCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityCollectionViewCell.swift; sourceTree = "<group>"; };
+		AA9396F22ACD93BA000E6798 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		AAA62D5F2AC319E1006C7A6C /* WeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA62D622AC319E1006C7A6C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAA62D642AC319E1006C7A6C /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -76,6 +78,7 @@
 			children = (
 				AAA62D622AC319E1006C7A6C /* AppDelegate.swift */,
 				AAA62D642AC319E1006C7A6C /* SceneDelegate.swift */,
+				AA9396F22ACD93BA000E6798 /* Extensions.swift */,
 				AA75D1BC2ACB03FD00B1C5AA /* Controllers */,
 				AAA782522AC5B62200061C45 /* Networking */,
 				AAA62D6D2AC319E4006C7A6C /* LaunchScreen.storyboard */,
@@ -167,6 +170,7 @@
 				AA75D1BB2ACB00B700B1C5AA /* CitiesListController.swift in Sources */,
 				AA75D1C02ACB045900B1C5AA /* CityCollectionViewCell.swift in Sources */,
 				AAA782512AC5B61400061C45 /* WeatherModel.swift in Sources */,
+				AA9396F32ACD9408000E6798 /* Extensions.swift in Sources */,
 				AAA7824F2AC5B60500061C45 /* NetworkManager.swift in Sources */,
 				AAA62D772AC31B20006C7A6C /* WeatherViewController.swift in Sources */,
 				AAA62D632AC319E1006C7A6C /* AppDelegate.swift in Sources */,

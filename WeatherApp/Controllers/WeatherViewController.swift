@@ -119,6 +119,20 @@ final class WeatherViewController: UIViewController {
         getWeather(from: currentCity)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
+        
+//        if currentCity.isEmpty {
+//            geoButtonAction()
+//        } else {
+//            getWeather(from: currentCity)
+//        }
+//        
+//        if self.isBeingPresented {
+//            view.backgroundColor = .systemPink
+//        }
+    }
     
     //MARK: Methods
     private func setupLayout() {
