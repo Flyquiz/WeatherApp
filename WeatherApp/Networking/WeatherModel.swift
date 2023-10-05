@@ -7,6 +7,7 @@
 
 import UIKit
 
+//TODO: Возможно придется делать новую модель погоды и инициализировать её из старой модели
 struct Weather: Decodable {
     let location: Location
     let current: Current
@@ -36,4 +37,24 @@ struct Current: Decodable {
 
 struct Condition: Decodable {
     let text: String
+}
+
+
+struct City {
+    let name: String
+    let weather: Weather
+}
+
+final class CitiesStore {
+    
+    static let shared = CitiesStore()
+    
+    public var cities: [City] = []
+    
+    private init() {}
+    
+    public func addCity(name city: String, weather: Weather) {
+        let newCity = City(name: city, weather: weather)
+        cities.append(newCity)
+    }
 }

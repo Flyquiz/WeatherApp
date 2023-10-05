@@ -7,14 +7,14 @@
 
 import UIKit
 
-//MARK: Identifier for registration cells
+/// Identifier for registration cells
 extension UIView {
     static var identifier: String {
         String(describing: self)
     }
 }
 
-//MARK: Checking emptiness with spaces
+/// Checking emptiness with spaces
 extension String {
     public var checkEmptiness: Bool {
         get {

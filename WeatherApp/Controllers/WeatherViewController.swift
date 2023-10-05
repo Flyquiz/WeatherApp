@@ -10,9 +10,18 @@ import CoreLocation
 
 final class WeatherViewController: UIViewController {
     
-    //TODO: Temporary
-    private let currentCity = "Peterburg"
+    public var callBack: (() -> ())?
+    private let citiesStore = CitiesStore.shared
+    public var currentWeather: Weather? = nil
+    
     private var isGettingDataFromGeo = false
+    
+    //TODO: Temporary
+    public var currentCity = "" {
+        didSet {
+            isGettingDataFromGeo = false
+        }
+    }
     
     private let networkManager = NetworkManager.shared
     
@@ -111,29 +120,48 @@ final class WeatherViewController: UIViewController {
         return button
     }()
     
+    private lazy var addButton: UIButton = {
+        let button = UIButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.setTitle("Add", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        button.addTarget(self, action: #selector(addAction), for: .touchUpInside)
+        return button
+    }()
+    
     //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.navigationController?.navigationBar.isHidden = true
         setupLayout()
-        getWeather(from: currentCity)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
         
-//        if currentCity.isEmpty {
-//            geoButtonAction()
-//        } else {
-//            getWeather(from: currentCity)
-//        }
-//        
-//        if self.isBeingPresented {
-//            view.backgroundColor = .systemPink
-//        }
+        if currentCity.isEmpty {
+            geoButtonAction()
+        } else {
+            getWeather(from: currentCity)
+        }
+        
+        if self.isBeingPresented {
+            geoButton.isHidden = true
+            citiesListButton.isHidden = true
+            addButton.isHidden = false
+        } else {
+            geoButton.isHidden = false
+            citiesListButton.isHidden = false
+            addButton.isHidden = true
+        }
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        callBack?()
+    }
+    
+
     //MARK: Methods
     private func setupLayout() {
         view.backgroundColor = .systemGray6
@@ -147,7 +175,8 @@ final class WeatherViewController: UIViewController {
          pressureLabel,
          activityIndicator,
          geoButton,
-         citiesListButton].forEach { view.addSubview($0) }
+         citiesListButton,
+         addButton].forEach { view.addSubview($0) }
         
         let verticalInset: CGFloat = 10
         let leadingInset: CGFloat = 20
@@ -182,26 +211,11 @@ final class WeatherViewController: UIViewController {
             citiesListButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingInset),
             
             geoButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
-            geoButton.leadingAnchor.constraint(equalTo: citiesListButton.trailingAnchor, constant: 20)
+            geoButton.leadingAnchor.constraint(equalTo: citiesListButton.trailingAnchor, constant: 20),
+            
+            addButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
+            addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -leadingInset)
         ])
-    }
-    
-    private func fillToVC(weather: Weather) {
-        cityLabel.text! += weather.location.name
-        conditionLabel.text! += weather.current.condition.text
-        tempLabel.text! += "\(weather.current.temp) C"
-        pressureLabel.text! += "\(weather.current.pressureInch) inch"
-        windSpdLabel.text! += "\(weather.current.windSpd) kph"
-        windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
-        
-        //TODO: activityIndicator
-        activityIndicator.stopAnimating()
-        
-        if isGettingDataFromGeo {
-            geoButton.tintColor = .systemBlue
-        } else {
-            geoButton.tintColor = .black
-        }
     }
     
     private func clearVC() {
@@ -211,6 +225,25 @@ final class WeatherViewController: UIViewController {
         pressureLabel.text! = "Pressure - "
         windSpdLabel.text! = "Speed - "
         windDirLabel.text! = "Direction - "
+    }
+    
+    private func fillToVC(weather: Weather) {
+        cityLabel.text! += weather.location.name
+        conditionLabel.text! += weather.current.condition.text
+        tempLabel.text! += "\(weather.current.temp) C"
+        pressureLabel.text! += "\(weather.current.pressureInch) inch"
+        windSpdLabel.text! += "\(weather.current.windSpd) kph"
+        windDirLabel.text! += "\(weather.current.windDegr) \(weather.current.windDir)"
+        currentWeather = weather
+        
+        //TODO: activityIndicator
+        activityIndicator.stopAnimating()
+        
+        if isGettingDataFromGeo {
+            geoButton.tintColor = .systemBlue
+        } else {
+            geoButton.tintColor = .black
+        }
     }
     
     //MARK: Alert methods
@@ -234,6 +267,7 @@ final class WeatherViewController: UIViewController {
     }
     
     //MARK: Networking
+    //TODO: Пофиксить кейс с ненаходом
     private func getWeather(from location: String) {
 //        activityIndicator.startAnimating()
         networkManager.fetchWeather(location) { [weak self] result in
@@ -259,6 +293,12 @@ final class WeatherViewController: UIViewController {
     
     @objc private func citiesListAction() {
         navigationController?.pushViewController(CitiesListController(), animated: true)
+    }
+    
+    @objc private func addAction() {
+        guard let weather = currentWeather, let cityName = cityLabel.text else { return }
+        citiesStore.addCity(name: cityName, weather: weather)
+        self.dismiss(animated: true) 
     }
 }
               

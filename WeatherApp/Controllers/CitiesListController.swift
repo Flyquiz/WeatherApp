@@ -9,6 +9,8 @@ import UIKit
 
 final class CitiesListController: UIViewController {
     
+    private var citiesArray = CitiesStore.shared.cities
+    
     //MARK: UIElements
     private lazy var citiesCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
@@ -24,6 +26,7 @@ final class CitiesListController: UIViewController {
     
     private lazy var citySearchController: UISearchController = {
         let searchController = UISearchController()
+        searchController.delegate = self
         searchController.searchBar.delegate = self
         return searchController
     }()
@@ -40,6 +43,7 @@ final class CitiesListController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.navigationBar.isHidden = false
+        citiesCollectionView.reloadData()
     }
     
     //MARK: Methods
@@ -61,12 +65,13 @@ final class CitiesListController: UIViewController {
 //MARK: collectionView: DataSource
 extension CitiesListController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        10
+        citiesArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CityCollectionViewCell.identifier, for: indexPath) as! CityCollectionViewCell
         cell.contentView.layer.cornerRadius = cell.bounds.height / 5
+        cell.setupCell(city: citiesArray[indexPath.item]) 
         return cell
     }
 }
@@ -93,16 +98,24 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
 
 
 
-extension CitiesListController: UISearchBarDelegate {
+extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate {
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         guard let text = searchBar.text else { return }
         if text.checkEmptiness {
             let vc = WeatherViewController()
             vc.currentCity = text
+            vc.callBack = {
+                self.citiesArray = CitiesStore.shared.cities
+                self.citySearchController.isActive = false
+                self.citiesCollectionView.reloadData()
+            }
             present(vc, animated: true)
         } else {
             searchBar.text = ""
             return
         }
+    }
+    func willDismissSearchController(_ searchController: UISearchController) {
+        self.citiesCollectionView.reloadData()
     }
 }
