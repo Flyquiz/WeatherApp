@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+//TODO: Данные не обновляются
 final class CitiesListController: UIViewController {
     
     private var citiesArray = CitiesStore.shared.cities
@@ -20,6 +20,7 @@ final class CitiesListController: UIViewController {
         collectionView.dataSource = self
         collectionView.delegate = self
         collectionView.register(CityCollectionViewCell.self, forCellWithReuseIdentifier: CityCollectionViewCell.identifier)
+        collectionView.register(HeaderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderCollectionReusableView.identifier)
         collectionView.backgroundColor = view.backgroundColor
         return collectionView
     }()
@@ -71,8 +72,37 @@ extension CitiesListController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CityCollectionViewCell.identifier, for: indexPath) as! CityCollectionViewCell
         cell.contentView.layer.cornerRadius = cell.bounds.height / 5
-        cell.setupCell(city: citiesArray[indexPath.item]) 
-        return cell
+        
+        switch indexPath.section {
+        case 0:
+            return cell
+        default:
+            cell.setupCell(city: citiesArray[indexPath.item])
+            return cell
+        }
+    }
+    
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        2
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderCollectionReusableView.identifier, for: indexPath) as! HeaderCollectionReusableView        
+        switch indexPath.section {
+        case 0:
+            header.headerLabel.text = "Current location"
+            return header
+        case 1:
+            header.headerLabel.text = "Favorites"
+            return header
+        default:
+            return header
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        //TODO: Расчет высоты хедера
+        return CGSize(width: view.bounds.width, height: view.bounds.width / 20)
     }
 }
 
@@ -97,7 +127,7 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
 }
 
 
-
+//MARK: Search delegates
 extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate {
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         guard let text = searchBar.text else { return }
@@ -115,6 +145,7 @@ extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate 
             return
         }
     }
+    //TODO: Стоит убрать
     func willDismissSearchController(_ searchController: UISearchController) {
         self.citiesCollectionView.reloadData()
     }

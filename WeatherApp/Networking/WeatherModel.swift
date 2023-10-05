@@ -8,16 +8,16 @@
 import UIKit
 
 //TODO: Возможно придется делать новую модель погоды и инициализировать её из старой модели
-struct Weather: Decodable {
+struct Weather: Codable {
     let location: Location
     let current: Current
 }
 
-struct Location: Decodable {
+struct Location: Codable {
     let name: String
 }
 
-struct Current: Decodable {
+struct Current: Codable {
     let temp: Double
     let windSpd: Double
     let windDegr: Double
@@ -35,12 +35,12 @@ struct Current: Decodable {
     }
 }
 
-struct Condition: Decodable {
+struct Condition: Codable {
     let text: String
 }
 
 
-struct City {
+struct City: Codable {
     let name: String
     let weather: Weather
 }
@@ -49,9 +49,29 @@ final class CitiesStore {
     
     static let shared = CitiesStore()
     
-    public var cities: [City] = []
+    private let userDefaults = UserDefaults.standard
     
-    private init() {}
+    public var cities: [City] = [] {
+        didSet {
+            do {
+                let data = try JSONEncoder().encode(cities)
+                userDefaults.setValue(data, forKey: "cities")
+            } catch {
+                print("UserDefaults encoding error: \(error)")
+            }
+        }
+    }
+    
+    
+    private init() {
+        guard let data = userDefaults.data(forKey: "cities") else { return }
+        do {
+            cities = try JSONDecoder().decode([City].self, from: data)
+        } catch {
+            print("UserDefaults decoding error: \(error)")
+        }
+    }
+    
     
     public func addCity(name city: String, weather: Weather) {
         let newCity = City(name: city, weather: weather)
