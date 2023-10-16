@@ -11,6 +11,8 @@ final class CitiesListController: UIViewController {
     
     private var citiesArray = CitiesStore.shared.cities
     
+    private var geoWeather: Weather? = nil
+    
     //MARK: UIElements
     private lazy var citiesCollectionView: UICollectionView = {
         let flowLayout = UICollectionViewFlowLayout()
@@ -39,6 +41,8 @@ final class CitiesListController: UIViewController {
         navigationItem.hidesSearchBarWhenScrolling = false
         title = "Weather"
         setupLayout()
+        let previousVC = WeatherViewController()
+        previousVC.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -66,7 +70,12 @@ final class CitiesListController: UIViewController {
 //MARK: collectionView: DataSource
 extension CitiesListController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        citiesArray.count
+        switch section {
+        case 0:
+            return 1
+        default:
+            return citiesArray.count
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -75,7 +84,14 @@ extension CitiesListController: UICollectionViewDataSource {
         
         switch indexPath.section {
         case 0:
-            return cell
+            if let weather = geoWeather {
+                let currentCity = City(name: weather.location.name, weather: weather)
+                cell.setupCell(city: currentCity)
+                return cell
+            } else {
+                cell.showError()
+                return cell
+            }
         default:
             cell.setupCell(city: citiesArray[indexPath.item])
             return cell
@@ -148,5 +164,14 @@ extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate 
     //TODO: Стоит убрать
     func willDismissSearchController(_ searchController: UISearchController) {
         self.citiesCollectionView.reloadData()
+    }
+}
+
+
+
+//MARK: VCDelegate
+extension CitiesListController: WeatherSenderDelegate {
+    func getGeoWeatherFromVC(weather: Weather?) {
+        geoWeather = weather
     }
 }

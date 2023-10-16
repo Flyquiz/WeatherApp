@@ -8,11 +8,19 @@
 import UIKit
 import CoreLocation
 
+protocol WeatherSenderDelegate: AnyObject {
+    func getGeoWeatherFromVC(weather: Weather?)
+}
+
 final class WeatherViewController: UIViewController {
     
+    weak var delegate: WeatherSenderDelegate?
     public var callBack: (() -> ())?
+    
     private let citiesStore = CitiesStore.shared
-    public var currentWeather: Weather? = nil
+    //TODO: Заприватить
+    public var currentWeather: Weather?
+    private var geoWeather: Weather?
     
     private var isGettingDataFromGeo = false
     
@@ -155,7 +163,7 @@ final class WeatherViewController: UIViewController {
             addButton.isHidden = true
         }
     }
-    
+    //TODO: Переместить callBack
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         callBack?()
@@ -241,6 +249,7 @@ final class WeatherViewController: UIViewController {
         
         if isGettingDataFromGeo {
             geoButton.tintColor = .systemBlue
+            geoWeather = weather
         } else {
             geoButton.tintColor = .black
         }
@@ -248,15 +257,25 @@ final class WeatherViewController: UIViewController {
     
     //MARK: Alert methods
     private func showNetworkAlert(error: NetworkError) {
-        let alertAction = UIAlertAction(title: "Try again",
-                                        style: .default) { _ in
-            self.getWeather(from: self.currentCity)
-        }
         let alert = UIAlertController(title: "Error",
                                       message: error.title,
                                       preferredStyle: .alert)
-            alert.addAction(alertAction)
-        present(alert, animated: true)
+        let tryAgainAction = UIAlertAction(title: "Try again",
+                                        style: .default) { _ in
+            self.getWeather(from: self.currentCity)
+        }
+        let okAction = UIAlertAction(title: "OK",
+                                     style: .default)
+        if self.isBeingPresented {
+            alert.message = "Can't find the city"
+            alert.addAction(okAction)
+            present(alert, animated: true)
+        } else {
+            [tryAgainAction, okAction].forEach {
+                alert.addAction($0)
+            }
+            present(alert, animated: true)
+        }
     }
     
     private func showLocationAlert() {
@@ -267,7 +286,6 @@ final class WeatherViewController: UIViewController {
     }
     
     //MARK: Networking
-    //TODO: Пофиксить кейс с ненаходом
     private func getWeather(from location: String) {
 //        activityIndicator.startAnimating()
         networkManager.fetchWeather(location) { [weak self] result in
@@ -292,7 +310,9 @@ final class WeatherViewController: UIViewController {
     }
     
     @objc private func citiesListAction() {
-        navigationController?.pushViewController(CitiesListController(), animated: true)
+        let vc = CitiesListController()
+        vc.getGeoWeatherFromVC(weather: geoWeather)
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc private func addAction() {
@@ -306,6 +326,7 @@ final class WeatherViewController: UIViewController {
               
 
 //MARK: Location
+//TODO: Добиться загрузки геопогоды в фоне
 extension WeatherViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {

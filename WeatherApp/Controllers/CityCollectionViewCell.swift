@@ -33,6 +33,16 @@ final class CityCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
+    private let errorLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "Geolocation disabled"
+        label.font = .systemFont(ofSize: 20, weight: .bold)
+        label.isHidden = true
+        return label
+    }()
+    
+    
     //MARK: Init. and methods
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -55,13 +65,22 @@ final class CityCollectionViewCell: UICollectionViewCell {
         cityLabel.text = city.name
         conditionLabel.text = city.weather.current.condition.text
         tempLabel.text = String(city.weather.current.temp)
-        
+    }
+    
+    public func showError() {
+        cityLabel.isHidden = true
+        conditionLabel.isHidden = true
+        tempLabel.isHidden = true
+        errorLabel.isHidden = false
     }
     
     private func setupLayout() {
         contentView.backgroundColor = .systemGray5
         
-        [cityLabel, conditionLabel, tempLabel].forEach {
+        [cityLabel,
+         conditionLabel,
+         tempLabel,
+         errorLabel].forEach {
             contentView.addSubview($0)
         }
         
@@ -74,7 +93,10 @@ final class CityCollectionViewCell: UICollectionViewCell {
             conditionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -inset),
             
             tempLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -inset),
-            tempLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            tempLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            
+            errorLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            errorLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
 }
