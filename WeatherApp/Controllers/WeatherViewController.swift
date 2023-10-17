@@ -316,8 +316,8 @@ final class WeatherViewController: UIViewController {
     }
     
     @objc private func addAction() {
-        guard let weather = currentWeather, let cityName = cityLabel.text else { return }
-        citiesStore.addCity(name: cityName, weather: weather)
+        guard let weather = currentWeather else { return }
+        citiesStore.addCity(name: weather.location.name, weather: weather)
         self.dismiss(animated: true) 
     }
 }

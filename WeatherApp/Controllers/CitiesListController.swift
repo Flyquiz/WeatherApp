@@ -9,7 +9,7 @@ import UIKit
 //TODO: Данные не обновляются
 final class CitiesListController: UIViewController {
     
-    private var citiesArray = CitiesStore.shared.cities
+    private var citiesStore = CitiesStore.shared
     
     private var geoWeather: Weather? = nil
     
@@ -74,7 +74,7 @@ extension CitiesListController: UICollectionViewDataSource {
         case 0:
             return 1
         default:
-            return citiesArray.count
+            return citiesStore.cities.count
         }
     }
     
@@ -93,7 +93,7 @@ extension CitiesListController: UICollectionViewDataSource {
                 return cell
             }
         default:
-            cell.setupCell(city: citiesArray[indexPath.item])
+            cell.setupCell(city: citiesStore.cities[indexPath.item])
             return cell
         }
     }
@@ -151,7 +151,7 @@ extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate 
             let vc = WeatherViewController()
             vc.currentCity = text
             vc.callBack = {
-                self.citiesArray = CitiesStore.shared.cities
+                self.citiesStore.cities = CitiesStore.shared.cities
                 self.citySearchController.isActive = false
                 self.citiesCollectionView.reloadData()
             }
