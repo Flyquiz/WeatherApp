@@ -57,13 +57,13 @@ final class CitiesStore {
     
     
     private init() {
-//        guard let data = userDefaults.data(forKey: "cities") else { return }
-//        do {
-//            cities = try JSONDecoder().decode([City].self, from: data)
-//        } catch {
-//            print("UserDefaults decoding error: \(error)")
-//        }
-        updateWeathers()
+                guard let data = userDefaults.data(forKey: "cities") else { return }
+                do {
+                    cities = try JSONDecoder().decode([City].self, from: data)
+                } catch {
+                    print("UserDefaults decoding error: \(error)")
+                }
+//        updateWeathers()
     }
     
     
@@ -88,6 +88,7 @@ final class CitiesStore {
         
         var archiveCites: [City] = []
         var updatedCities: [City] = []
+        
         do {
             archiveCites = try JSONDecoder().decode([City].self, from: data)
             
@@ -96,6 +97,7 @@ final class CitiesStore {
         }
         
         print("Archive: \(archiveCites)")
+        
         
         let dispatchGroup = DispatchGroup()
         
@@ -112,6 +114,7 @@ final class CitiesStore {
                 dispatchGroup.leave()
             }
         }
+        
         dispatchGroup.notify(queue: .main) {
             print("counter: \(updatedCities.count), \(archiveCites.count)")
             if updatedCities.count == archiveCites.count {
@@ -124,6 +127,9 @@ final class CitiesStore {
         }
     }
     
+    public func deleteCity(city: City) {
+        
+    }
 }
 
 

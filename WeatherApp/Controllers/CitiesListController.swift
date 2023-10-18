@@ -21,8 +21,11 @@ final class CitiesListController: UIViewController {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.dataSource = self
         collectionView.delegate = self
+        
         collectionView.register(CityCollectionViewCell.self, forCellWithReuseIdentifier: CityCollectionViewCell.identifier)
+        collectionView.register(FavoriteCityCollectionViewCell.self, forCellWithReuseIdentifier: FavoriteCityCollectionViewCell.identifier)
         collectionView.register(HeaderCollectionReusableView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: HeaderCollectionReusableView.identifier)
+        
         collectionView.backgroundColor = view.backgroundColor
         return collectionView
     }()
@@ -37,12 +40,10 @@ final class CitiesListController: UIViewController {
     //MARK: LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationItem.searchController = citySearchController
-        navigationItem.hidesSearchBarWhenScrolling = false
-        title = "Weather"
-        setupLayout()
         let previousVC = WeatherViewController()
         previousVC.delegate = self
+        setupNavigationBar()
+        setupLayout()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -52,6 +53,13 @@ final class CitiesListController: UIViewController {
     }
     
     //MARK: Methods
+    private func setupNavigationBar() {
+        navigationItem.searchController = citySearchController
+        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationItem.rightBarButtonItem = editButtonItem
+        title = "Weather"
+    }
+    
     private func setupLayout() {
         view.backgroundColor = .systemGray6
         view.addSubview(citiesCollectionView)
@@ -62,6 +70,21 @@ final class CitiesListController: UIViewController {
             citiesCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             citiesCollectionView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+//        citiesCollectionView.allowsMultipleSelection = editing
+        citiesCollectionView.indexPathsForVisibleItems.forEach { indexPath in
+            guard indexPath.section != 0 else { return }
+            let cell = citiesCollectionView.cellForItem(at: indexPath) as! FavoriteCityCollectionViewCell
+                cell.isEditing = editing
+        }
+    }
+    
+    private func deleteCell(at indexPath: IndexPath) {
+        citiesStore.cities.remove(at: indexPath.item)
+        citiesCollectionView.reloadData()
     }
 }
 
@@ -79,11 +102,10 @@ extension CitiesListController: UICollectionViewDataSource {
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CityCollectionViewCell.identifier, for: indexPath) as! CityCollectionViewCell
-        cell.contentView.layer.cornerRadius = cell.bounds.height / 5
-        
         switch indexPath.section {
         case 0:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CityCollectionViewCell.identifier, for: indexPath) as! CityCollectionViewCell
+            cell.contentView.layer.cornerRadius = cell.bounds.height / 5
             if let weather = geoWeather {
                 let currentCity = City(name: weather.location.name, weather: weather)
                 cell.setupCell(city: currentCity)
@@ -93,14 +115,18 @@ extension CitiesListController: UICollectionViewDataSource {
                 return cell
             }
         default:
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: FavoriteCityCollectionViewCell.identifier, for: indexPath) as! FavoriteCityCollectionViewCell
+            cell.contentView.layer.cornerRadius = cell.bounds.height / 5
             cell.setupCell(city: citiesStore.cities[indexPath.item])
+            cell.isEditing = isEditing
+            cell.deleteCallBack = { [weak self] in
+                self?.deleteCell(at: indexPath)
+            }
             return cell
         }
     }
     
-    func numberOfSections(in collectionView: UICollectionView) -> Int {
-        2
-    }
+    func numberOfSections(in collectionView: UICollectionView) -> Int { 2 }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let header = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HeaderCollectionReusableView.identifier, for: indexPath) as! HeaderCollectionReusableView        
@@ -115,11 +141,6 @@ extension CitiesListController: UICollectionViewDataSource {
             return header
         }
     }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        //TODO: Расчет высоты хедера
-        return CGSize(width: view.bounds.width, height: view.bounds.width / 20)
-    }
 }
 
 
@@ -129,6 +150,10 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
     
     private var inset: CGFloat { return 20 }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        //TODO: Расчет высоты хедера
+        return CGSize(width: view.bounds.width, height: view.bounds.width / 20)
+    }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.bounds.width - inset * 2
         let height = (collectionView.bounds.height - inset * 6) / 5
@@ -139,6 +164,12 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
     }
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return inset
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(indexPath)
+//        if !isEditing {
+//            //detailView
+//        } 
     }
 }
 

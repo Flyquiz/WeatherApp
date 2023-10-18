@@ -7,10 +7,10 @@
 
 import UIKit
 
-final class CityCollectionViewCell: UICollectionViewCell {
+class CityCollectionViewCell: UICollectionViewCell {
     
     //MARK: UIElements
-    private let cityLabel: UILabel = {
+    fileprivate let cityLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "city"
@@ -18,14 +18,14 @@ final class CityCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    private let conditionLabel: UILabel = {
+    fileprivate let conditionLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "condition"
         return label
     }()
     
-    private let tempLabel: UILabel = {
+    fileprivate let tempLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "temp"
@@ -74,7 +74,7 @@ final class CityCollectionViewCell: UICollectionViewCell {
         errorLabel.isHidden = false
     }
     
-    private func setupLayout() {
+    fileprivate func setupLayout() {
         contentView.backgroundColor = .systemGray5
         
         [cityLabel,
@@ -98,5 +98,60 @@ final class CityCollectionViewCell: UICollectionViewCell {
             errorLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
             errorLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
+    }
+}
+
+final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
+    
+    public var deleteCallBack: (() -> ()) = {}
+    
+    public var isEditing = false {
+        didSet {
+            tempLabel.isHidden = isEditing
+            deleteButton.isHidden = !isEditing
+            moveButton.isHidden = !isEditing
+        }
+    }
+    
+    private let deleteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let buttonImage =  UIImage(systemName: "trash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        button.tintColor = .systemRed
+        button.setImage(buttonImage, for: .normal)
+        button.isHidden = true
+        button.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
+        return button
+    }()
+    
+    private let moveButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        let buttonImage =  UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        button.tintColor = .systemGray
+        button.setImage(buttonImage, for: .normal)
+        button.isHidden = true
+        return button
+    }()
+    
+    
+    override func setupLayout() {
+        super.setupLayout()
+        
+        [deleteButton,moveButton].forEach {
+            contentView.addSubview($0)
+        }
+        
+        NSLayoutConstraint.activate([
+            deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+            deleteButton.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor),
+            
+            moveButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            moveButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+        ])
+    }
+    
+    @objc private func deleteAction() {
+        deleteCallBack()
     }
 }
