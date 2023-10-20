@@ -109,7 +109,7 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
         didSet {
             tempLabel.isHidden = isEditing
             deleteButton.isHidden = !isEditing
-            moveButton.isHidden = !isEditing
+            moveImage.isHidden = !isEditing
         }
     }
     
@@ -124,21 +124,19 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
         return button
     }()
     
-    private let moveButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        let buttonImage =  UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
-        button.tintColor = .systemGray
-        button.setImage(buttonImage, for: .normal)
-        button.isHidden = true
-        return button
+    private let moveImage: UIImageView = {
+        let imageView = UIImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        let image =  UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        imageView.tintColor = .systemGray
+        imageView.image = image
+        return imageView
     }()
-    
     
     override func setupLayout() {
         super.setupLayout()
         
-        [deleteButton,moveButton].forEach {
+        [deleteButton,moveImage].forEach {
             contentView.addSubview($0)
         }
         
@@ -146,8 +144,8 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
             deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
             deleteButton.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor),
             
-            moveButton.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            moveButton.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            moveImage.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+            moveImage.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
         ])
     }
     

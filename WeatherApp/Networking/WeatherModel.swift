@@ -56,7 +56,6 @@ final class CitiesStore {
     public var cities: [City] = [] {
         didSet {
             do {
-                print("Current : \(cities)")
                 let data = try JSONEncoder().encode(cities)
                 userDefaults.setValue(data, forKey: "cities")
             } catch {
@@ -82,7 +81,6 @@ final class CitiesStore {
         cities.append(newCity)
     }
     
-    //TODO: Возможное изменение порядка
     //TODO: Отправка ошибки в CitiesListVC
     public func updateWeathers() {
         guard let data = userDefaults.data(forKey: "cities") else { return }
@@ -113,11 +111,8 @@ final class CitiesStore {
         }
         
         dispatchGroup.notify(queue: .main) {
-            print("counter: \(updatedCities.count), \(archiveCites.count)")
             if updatedCities.count == archiveCites.count {
-                print("Before \nArchive: \(archiveCites)\nUpdated: \(updatedCities)\n")
                 self.cities = sortCities()
-                print("After \nArchive: \(archiveCites)\nUpdated: \(sortCities())\n")
                 print("success update")
             } else {
                 self.cities = archiveCites

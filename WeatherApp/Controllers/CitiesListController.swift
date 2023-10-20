@@ -6,7 +6,6 @@
 //
 
 import UIKit
-//TODO: Данные не обновляются
 final class CitiesListController: UIViewController {
     
     private var citiesStore = CitiesStore.shared
@@ -44,6 +43,7 @@ final class CitiesListController: UIViewController {
         previousVC.delegate = self
         setupNavigationBar()
         setupLayout()
+        setupGesture()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -72,6 +72,11 @@ final class CitiesListController: UIViewController {
         ])
     }
     
+    private func setupGesture() {
+        let longPressGesture = UILongPressGestureRecognizer(target: self, action: #selector(longPressGestureAction))
+        citiesCollectionView.addGestureRecognizer(longPressGesture)
+    }
+    
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
 //        citiesCollectionView.allowsMultipleSelection = editing
@@ -84,8 +89,23 @@ final class CitiesListController: UIViewController {
     
     private func deleteCell(at indexPath: IndexPath) {
         citiesStore.cities.remove(at: indexPath.item)
-        print("Deleted: \(citiesStore.cities)")
         citiesCollectionView.reloadData()
+    }
+    
+    //MARK: Actions
+    @objc private func longPressGestureAction(_ gesture: UILongPressGestureRecognizer) {
+        let gestureLocation = gesture.location(in: citiesCollectionView)
+        switch gesture.state {
+        case .began:
+            guard let targetIndexPath = citiesCollectionView.indexPathForItem(at: gestureLocation) else { return }
+            citiesCollectionView.beginInteractiveMovementForItem(at: targetIndexPath)
+        case .changed:
+            citiesCollectionView.updateInteractiveMovementTargetPosition(gestureLocation)
+        case .ended:
+            citiesCollectionView.endInteractiveMovement()
+        default:
+            citiesCollectionView.cancelInteractiveMovement()
+        }
     }
 }
 
@@ -155,22 +175,39 @@ extension CitiesListController: UICollectionViewDelegateFlowLayout {
         //TODO: Расчет высоты хедера
         return CGSize(width: view.bounds.width, height: view.bounds.width / 20)
     }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let width = collectionView.bounds.width - inset * 2
         let height = (collectionView.bounds.height - inset * 6) / 5
         return CGSize(width: width, height: height)
     }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: inset, left: inset, bottom: inset, right: inset)
     }
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return inset
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(indexPath)
 //        if !isEditing {
 //            //detailView
-//        } 
+        //        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, canMoveItemAt indexPath: IndexPath) -> Bool {
+        switch indexPath.section {
+        case 0:
+            return false
+        default:
+            return isEditing
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, moveItemAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
+        let item = citiesStore.cities.remove(at: sourceIndexPath.item)
+        citiesStore.cities.insert(item, at: destinationIndexPath.item)
     }
 }
 
