@@ -84,6 +84,7 @@ final class CitiesListController: UIViewController {
     
     private func deleteCell(at indexPath: IndexPath) {
         citiesStore.cities.remove(at: indexPath.item)
+        print("Deleted: \(citiesStore.cities)")
         citiesCollectionView.reloadData()
     }
 }

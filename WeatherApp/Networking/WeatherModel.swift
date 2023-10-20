@@ -53,32 +53,33 @@ final class CitiesStore {
     
     private let userDefaults = UserDefaults.standard
     
-    public var cities: [City] = []
+    public var cities: [City] = [] {
+        didSet {
+            do {
+                print("Current : \(cities)")
+                let data = try JSONEncoder().encode(cities)
+                userDefaults.setValue(data, forKey: "cities")
+            } catch {
+                print("UserDefaults encoding error: \(error)")
+            }
+        }
+    }
     
     
     private init() {
-                guard let data = userDefaults.data(forKey: "cities") else { return }
-                do {
-                    cities = try JSONDecoder().decode([City].self, from: data)
-                } catch {
-                    print("UserDefaults decoding error: \(error)")
-                }
-//        updateWeathers()
+        //                guard let data = userDefaults.data(forKey: "cities") else { return }
+        //                do {
+        //                    cities = try JSONDecoder().decode([City].self, from: data)
+        //                } catch {
+        //                    print("UserDefaults decoding error: \(error)")
+        //                }
+        updateWeathers()
     }
     
     
     public func addCity(name city: String, weather: Weather) {
         let newCity = City(name: city, weather: weather)
         cities.append(newCity)
-        
-        do {
-            print("Current : \(cities)")
-            let data = try JSONEncoder().encode(cities)
-            userDefaults.setValue(data, forKey: "cities")
-        } catch {
-            print("UserDefaults encoding error: \(error)")
-        }
-        
     }
     
     //TODO: Возможное изменение порядка
@@ -91,13 +92,9 @@ final class CitiesStore {
         
         do {
             archiveCites = try JSONDecoder().decode([City].self, from: data)
-            
         } catch {
             print("UserDefaults decoding error during update: \(error)")
         }
-        
-        print("Archive: \(archiveCites)")
-        
         
         let dispatchGroup = DispatchGroup()
         
@@ -118,12 +115,26 @@ final class CitiesStore {
         dispatchGroup.notify(queue: .main) {
             print("counter: \(updatedCities.count), \(archiveCites.count)")
             if updatedCities.count == archiveCites.count {
-                self.cities = updatedCities
+                print("Before \nArchive: \(archiveCites)\nUpdated: \(updatedCities)\n")
+                self.cities = sortCities()
+                print("After \nArchive: \(archiveCites)\nUpdated: \(sortCities())\n")
                 print("success update")
             } else {
                 self.cities = archiveCites
                 print("Can't update cities")
             }
+        }
+        
+        func sortCities() -> [City] {
+            var tempArray: [City] = []
+            for archC in archiveCites {
+                for updC in updatedCities {
+                    if updC.name == archC.name {
+                        tempArray.append(updC)
+                    }
+                }
+            }
+            return tempArray
         }
     }
     
