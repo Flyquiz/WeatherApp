@@ -84,15 +84,14 @@ class CityCollectionViewCell: UICollectionViewCell {
             contentView.addSubview($0)
         }
         
-        let inset: CGFloat = 20
         NSLayoutConstraint.activate([
-            cityLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: inset),
-            cityLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: inset),
+            cityLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: trailingInset),
+            cityLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: trailingInset),
             
-            conditionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: inset),
-            conditionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -inset),
+            conditionLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: trailingInset),
+            conditionLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -trailingInset),
             
-            tempLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -inset),
+            tempLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -trailingInset),
             tempLabel.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             
             errorLabel.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
@@ -107,9 +106,12 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
     
     public var isEditing = false {
         didSet {
-            tempLabel.isHidden = isEditing
-            deleteButton.isHidden = !isEditing
-            moveImage.isHidden = !isEditing
+            switch isEditing {
+            case true:
+                animateBeforeEditing()
+            case false:
+                animateAfterEditing()
+            }
         }
     }
     
@@ -119,7 +121,6 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
         let buttonImage =  UIImage(systemName: "trash.fill", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
         button.tintColor = .systemRed
         button.setImage(buttonImage, for: .normal)
-        button.isHidden = true
         button.addTarget(self, action: #selector(deleteAction), for: .touchUpInside)
         return button
     }()
@@ -127,29 +128,70 @@ final class FavoriteCityCollectionViewCell: CityCollectionViewCell {
     private let moveImage: UIImageView = {
         let imageView = UIImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        let image =  UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+        let image =  UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right", withConfiguration: UIImage.SymbolConfiguration(pointSize: 15))
         imageView.tintColor = .systemGray
         imageView.image = image
         return imageView
     }()
     
+    private let animateTransitionView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
     override func setupLayout() {
         super.setupLayout()
         
-        [deleteButton,moveImage].forEach {
-            contentView.addSubview($0)
-        }
+        contentView.addSubview(animateTransitionView)
+        animateTransitionView.addSubview(tempLabel)
+        animateTransitionView.addSubview(deleteButton)
         
         NSLayoutConstraint.activate([
-            deleteButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-            deleteButton.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor),
-            
-            moveImage.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-            moveImage.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+            animateTransitionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant:  -trailingInset),
+            animateTransitionView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            animateTransitionView.heightAnchor.constraint(equalToConstant: tempLabel.intrinsicContentSize.height),
+            animateTransitionView.widthAnchor.constraint(equalToConstant: tempLabel.intrinsicContentSize.width)
         ])
+    }
+    
+    private func animateBeforeEditing() {
+        contentView.addSubview(moveImage)
+        moveImage.centerXAnchor.constraint(equalTo: contentView.centerXAnchor).isActive = true
+        moveImage.centerYAnchor.constraint(equalTo: contentView.centerYAnchor).isActive = true
+        deleteButton.trailingAnchor.constraint(equalTo: tempLabel.trailingAnchor, constant: -trailingInset / 2).isActive = true
+        deleteButton.centerYAnchor.constraint(equalTo: tempLabel.centerYAnchor).isActive = true
+        moveImage.alpha = 0.0
+        
+        UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseOut) { [self] in
+            moveImage.alpha = 1.0
+            moveImage.transform = CGAffineTransform(scaleX: 2.0, y: 2.0)
+        }
+        
+        UIView.transition(from: tempLabel, to: deleteButton, duration: duration, options: [.showHideTransitionViews, .curveEaseInOut, .transitionCrossDissolve])
+    }
+    
+    private func animateAfterEditing() {
+        UIView.animate(withDuration: duration, delay: 0.0, options: .curveEaseOut) { [self] in
+            moveImage.alpha = 0.0
+            moveImage.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+        } completion: { [self] _ in
+            moveImage.removeFromSuperview()
+        }
+        
+        UIView.transition(from: deleteButton, to: tempLabel, duration: duration, options: [.showHideTransitionViews, .curveEaseInOut, .transitionCrossDissolve])
     }
     
     @objc private func deleteAction() {
         deleteCallBack()
     }
+}
+
+
+
+extension CityCollectionViewCell {
+    ///Trailing inset for constraints
+    internal var trailingInset: CGFloat { return 20 }
+    ///Time duration for all animations
+    internal var duration: Double { return 0.3 }
 }

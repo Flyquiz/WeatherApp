@@ -7,22 +7,24 @@
 
 import UIKit
 
-/// Identifier for registration cells
 extension UIView {
+    
+    /// Identifier for registration cells
     static var identifier: String {
         String(describing: self)
     }
 }
 
-/// Checking emptiness with spaces
 extension String {
+    
+    /// Checking emptiness with spaces
     public var checkEmptiness: Bool {
         get {
             guard self.isEmpty != true else { return false }
             
             for char in self {
                 guard char == Character(" ") else { return true }
-            } 
+            }
             return false
         }
     }
