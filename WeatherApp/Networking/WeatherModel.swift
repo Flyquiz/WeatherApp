@@ -66,13 +66,13 @@ final class CitiesStore {
     
     
     private init() {
-        //                guard let data = userDefaults.data(forKey: "cities") else { return }
-        //                do {
-        //                    cities = try JSONDecoder().decode([City].self, from: data)
-        //                } catch {
-        //                    print("UserDefaults decoding error: \(error)")
-        //                }
-        updateWeathers()
+                        guard let data = userDefaults.data(forKey: "cities") else { return }
+                        do {
+                            cities = try JSONDecoder().decode([City].self, from: data)
+                        } catch {
+                            print("UserDefaults decoding error: \(error)")
+                        }
+//        updateWeathers()
     }
     
     
@@ -126,6 +126,7 @@ final class CitiesStore {
                 for updC in updatedCities {
                     if updC.name == archC.name {
                         tempArray.append(updC)
+                        continue
                     }
                 }
             }

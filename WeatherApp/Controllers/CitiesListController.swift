@@ -33,6 +33,7 @@ final class CitiesListController: UIViewController {
         let searchController = UISearchController()
         searchController.delegate = self
         searchController.searchBar.delegate = self
+        searchController.searchBar.placeholder = "Add city"
         return searchController
     }()
     
@@ -88,8 +89,12 @@ final class CitiesListController: UIViewController {
     }
     
     private func deleteCell(at indexPath: IndexPath) {
-        citiesStore.cities.remove(at: indexPath.item)
-        citiesCollectionView.reloadData()
+        citiesCollectionView.performBatchUpdates {
+            citiesCollectionView.deleteItems(at: [indexPath])
+            citiesStore.cities.remove(at: indexPath.item)
+        } completion: { _ in 
+            self.citiesCollectionView.reloadData()
+        }
     }
     
     //MARK: Actions
