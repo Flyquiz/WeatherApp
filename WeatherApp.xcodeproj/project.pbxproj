@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		AA05A7712ACF1BD600A7441B /* HeaderCollectionReusableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA05A7702ACF1BD600A7441B /* HeaderCollectionReusableView.swift */; };
+		AA3A92CF2AE7FE0D00B13E14 /* PageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A92CE2AE7FE0D00B13E14 /* PageViewController.swift */; };
 		AA75D1BB2ACB00B700B1C5AA /* CitiesListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA75D1BA2ACB00B700B1C5AA /* CitiesListController.swift */; };
 		AA75D1C02ACB045900B1C5AA /* CityCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA75D1BF2ACB045900B1C5AA /* CityCollectionViewCell.swift */; };
 		AA9396F32ACD9408000E6798 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA9396F22ACD93BA000E6798 /* Extensions.swift */; };
@@ -22,6 +23,7 @@
 
 /* Begin PBXFileReference section */
 		AA05A7702ACF1BD600A7441B /* HeaderCollectionReusableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeaderCollectionReusableView.swift; sourceTree = "<group>"; };
+		AA3A92CE2AE7FE0D00B13E14 /* PageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageViewController.swift; sourceTree = "<group>"; };
 		AA75D1BA2ACB00B700B1C5AA /* CitiesListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitiesListController.swift; sourceTree = "<group>"; };
 		AA75D1BF2ACB045900B1C5AA /* CityCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CityCollectionViewCell.swift; sourceTree = "<group>"; };
 		AA9396F22ACD93BA000E6798 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 		AA75D1BC2ACB03FD00B1C5AA /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				AA3A92CE2AE7FE0D00B13E14 /* PageViewController.swift */,
 				AAA62D762AC31B20006C7A6C /* WeatherViewController.swift */,
 				AA75D1BA2ACB00B700B1C5AA /* CitiesListController.swift */,
 				AA75D1BF2ACB045900B1C5AA /* CityCollectionViewCell.swift */,
@@ -171,6 +174,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA75D1BB2ACB00B700B1C5AA /* CitiesListController.swift in Sources */,
+				AA3A92CF2AE7FE0D00B13E14 /* PageViewController.swift in Sources */,
 				AA05A7712ACF1BD600A7441B /* HeaderCollectionReusableView.swift in Sources */,
 				AA75D1C02ACB045900B1C5AA /* CityCollectionViewCell.swift in Sources */,
 				AAA782512AC5B61400061C45 /* WeatherModel.swift in Sources */,

@@ -223,7 +223,7 @@ extension CitiesListController: UISearchBarDelegate, UISearchControllerDelegate 
         guard let text = searchBar.text else { return }
         if text.checkEmptiness {
             let vc = WeatherViewController()
-            vc.currentCity = text
+            vc.getWeather(from: text)
             vc.callBack = {
                 self.citiesStore.cities = CitiesStore.shared.cities
                 self.citySearchController.isActive = false

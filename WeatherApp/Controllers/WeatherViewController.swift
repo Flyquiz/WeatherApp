@@ -12,37 +12,16 @@ protocol WeatherSenderDelegate: AnyObject {
     func getGeoWeatherFromVC(weather: Weather?)
 }
 
-final class WeatherViewController: UIViewController {
+class WeatherViewController: UIViewController {
     
     weak var delegate: WeatherSenderDelegate?
-    public var callBack: (() -> ())?
+    public var callBack: (() -> ()) = {}
     
     private let citiesStore = CitiesStore.shared
-    //TODO: Заприватить
-    public var currentWeather: Weather?
-    private var geoWeather: Weather?
-    
-    private var isGettingDataFromGeo = false
-    
-    //TODO: Temporary
-    public var currentCity = "" {
-        didSet {
-            isGettingDataFromGeo = false
-        }
-    }
+
+    private var currentWeather: Weather?
     
     private let networkManager = NetworkManager.shared
-    
-    private lazy var locationManager: CLLocationManager = {
-        let manager = CLLocationManager()
-        manager.delegate = self
-        manager.requestWhenInUseAuthorization()
-        manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        manager.requestLocation()
-        return manager
-    }()
-    
-    private lazy var currentLocation = CLLocation()
     
     //MARK: UIElements
     private let cityLabel: UILabel = {
@@ -104,17 +83,17 @@ final class WeatherViewController: UIViewController {
         return activityIndicator
     }()
     
-    private lazy var geoButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        let buttonImage = UIImage(systemName: "location.circle",
-                                  withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
-        button.tintColor = .black
-        button.setImage(buttonImage, for: .normal)
-        button.addTarget(self, action: #selector(geoButtonAction), for: .touchUpInside)
-        return button
-    }()
+//    private lazy var geoButton: UIButton = {
+//        let button = UIButton()
+//        button.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        let buttonImage = UIImage(systemName: "location.circle",
+//                                  withConfiguration: UIImage.SymbolConfiguration(pointSize: 30))
+//        button.tintColor = .black
+//        button.setImage(buttonImage, for: .normal)
+//        button.addTarget(self, action: #selector(geoButtonAction), for: .touchUpInside)
+//        return button
+//    }()
     
     private lazy var citiesListButton: UIButton = {
         let button = UIButton()
@@ -147,18 +126,10 @@ final class WeatherViewController: UIViewController {
         super.viewWillAppear(animated)
         self.navigationController?.navigationBar.isHidden = true
         
-        if currentCity.isEmpty {
-            geoButtonAction()
-        } else {
-            getWeather(from: currentCity)
-        }
-        
         if self.isBeingPresented {
-            geoButton.isHidden = true
             citiesListButton.isHidden = true
             addButton.isHidden = false
         } else {
-            geoButton.isHidden = false
             citiesListButton.isHidden = false
             addButton.isHidden = true
         }
@@ -166,7 +137,7 @@ final class WeatherViewController: UIViewController {
     //TODO: Переместить callBack
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        callBack?()
+        callBack()
     }
     
 
@@ -182,7 +153,6 @@ final class WeatherViewController: UIViewController {
          windDirLabel,
          pressureLabel,
          activityIndicator,
-         geoButton,
          citiesListButton,
          addButton].forEach { view.addSubview($0) }
         
@@ -218,8 +188,8 @@ final class WeatherViewController: UIViewController {
             citiesListButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
             citiesListButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: leadingInset),
             
-            geoButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
-            geoButton.leadingAnchor.constraint(equalTo: citiesListButton.trailingAnchor, constant: 20),
+//            geoButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
+//            geoButton.leadingAnchor.constraint(equalTo: citiesListButton.trailingAnchor, constant: 20),
             
             addButton.centerYAnchor.constraint(equalTo: citiesListButton.centerYAnchor),
             addButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -leadingInset)
@@ -247,12 +217,6 @@ final class WeatherViewController: UIViewController {
         //TODO: activityIndicator
         activityIndicator.stopAnimating()
         
-        if isGettingDataFromGeo {
-            geoButton.tintColor = .systemBlue
-            geoWeather = weather
-        } else {
-            geoButton.tintColor = .black
-        }
     }
     
     //MARK: Alert methods
@@ -262,7 +226,7 @@ final class WeatherViewController: UIViewController {
                                       preferredStyle: .alert)
         let tryAgainAction = UIAlertAction(title: "Try again",
                                         style: .default) { _ in
-            self.getWeather(from: self.currentCity)
+//            self.getWeather(from: self.currentCity)
         }
         let okAction = UIAlertAction(title: "OK",
                                      style: .default)
@@ -278,7 +242,7 @@ final class WeatherViewController: UIViewController {
         }
     }
     
-    private func showLocationAlert() {
+    public func showLocationAlert() {
         let alertAction = UIAlertAction(title: "OK", style: .default)
         let alert = UIAlertController(title: "Can't get location", message: "Allow access to geolocation in iPhone settings", preferredStyle: .alert)
             alert.addAction(alertAction)
@@ -286,7 +250,7 @@ final class WeatherViewController: UIViewController {
     }
     
     //MARK: Networking
-    private func getWeather(from location: String) {
+    public func getWeather(from location: String) {
 //        activityIndicator.startAnimating()
         networkManager.fetchWeather(location) { [weak self] result in
             switch result {
@@ -300,18 +264,18 @@ final class WeatherViewController: UIViewController {
     }
     
     //MARK: Actions
-    @objc private func geoButtonAction() {
-        if locationManager.authorizationStatus != .denied {
-            locationManager.requestLocation()
-        } else {
-            showLocationAlert()
-            //            locationManager.requestWhenInUseAuthorization()
-        }
-    }
+//    @objc private func geoButtonAction() {
+//        if locationManager.authorizationStatus != .denied {
+//            locationManager.requestLocation()
+//        } else {
+//            showLocationAlert()
+//            //            locationManager.requestWhenInUseAuthorization()
+//        }
+//    }
     
     @objc private func citiesListAction() {
         let vc = CitiesListController()
-        vc.getGeoWeatherFromVC(weather: geoWeather)
+//        vc.getGeoWeatherFromVC(weather: geoWeather)
         navigationController?.pushViewController(vc, animated: true)
     }
     
@@ -321,13 +285,37 @@ final class WeatherViewController: UIViewController {
         self.dismiss(animated: true) 
     }
 }
+
+
+
+final class GeoWeatherViewController: WeatherViewController {
+    
+    private var isGettingDataFromGeo = false
+
+    private var geoWeather: Weather?
+    
+    private lazy var locationManager: CLLocationManager = {
+        let manager = CLLocationManager()
+        manager.delegate = self
+        manager.requestWhenInUseAuthorization()
+        manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
+        manager.requestLocation()
+        return manager
+    }()
+    
+    private lazy var currentLocation = CLLocation()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+}
               
 
               
 
 //MARK: Location
 //TODO: Добиться загрузки геопогоды в фоне
-extension WeatherViewController: CLLocationManagerDelegate {
+extension GeoWeatherViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             print(location)
